@@ -1,0 +1,76 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./API-rate-limiter/Dockerfile.prod
+      target: prod
+    volumes:
+      - app-data:/app
+    restart: always
+    depends_on:
+      - redis
+      - mongodb
+      - email_service
+      - sms_service
+    env_file:
+      - ./API-rate-limiter/.env
+    environment:
+      NODE_ENV: production
+      DB_CONNECT: mongodb://mongodb:27017/irembo
+    expose:
+      - 8005
+    ports:
+      - '5001-5003:8005'
+    command: pm2-runtime start npm -- start -i max
+    deploy:
+      replicas: 3
+      placement:
+        max_replicas_per_node: 2
+        constraints: [node.role != manager]
+      update_config:
+        parallelism: 2
+        delay: 3s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+  mongodb:
+    image: mongo
+    restart: always
+    volumes:
+      - db-data:/data/db
+    ports:
+      - "27017:27017"
+  redis:
+    image: redis:alpine
+  email_service:
+    build:
+      context: .
+      dockerfile: ./Email_Service/docker/Dockerfile
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/usr/src/app
+    command: >
+      bash -c "python manage.py collectstatic --noinput &&
+        gunicorn acms.wsgi:application -w 2 -b 0.0.0.0:8000 --reload"
+  sms_service:
+    build:
+      context: .
+      dockerfile: ./SMS_Service/Dockerfile.prod
+      target: prod
+    volumes:
+      - app-data:/app
+    restart: always
+    expose:
+      - 8005
+    ports:
+      - '5001-5003:8005'
+    command: pm2-runtime start npm -- start -i max
+  
+volumes:
+  app-data:
+  db-data:
+  static_volume:
