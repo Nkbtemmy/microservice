@@ -1,0 +1,20 @@
+# Base image
+FROM node:lts-alpine AS base
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+
+# Development image
+FROM base AS dev
+ENV NODE_ENV=development
+COPY . .
+CMD ["npm", "run", "dev"]
+
+# Production image
+FROM base AS prod
+RUN npm install -g pm2
+COPY . .
+ENV NODE_ENV=production
+RUN npm run build
+# ENV HOST=app:8005
+CMD ["pm2-runtime", "start", "npm", "--", "start", "-i", "max"]

@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+pgdata
+.idea/
+.vscode/
+build/
+temp/
+dist
+pg_hba.conf
+# .env/
+.nyc_output
+build
+.github/
