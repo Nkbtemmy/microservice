@@ -6,15 +6,17 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Install Python and Package Libraries
-RUN apt-get update && apt-get install -y libpq-dev gcc postgresql-client \
-    python3-dev musl-dev
+# RUN apt-get update && apt-get install -y libpq-dev gcc postgresql-client \
+#     python3-dev musl-dev
+RUN apt-get update
 
 # install dependencies
 COPY ./requirements*.txt .
 RUN pip install --upgrade pip
+RUN pip install gunicorn
 RUN pip install -r requirements.txt
 
 # copy project
 COPY . .
 
-CMD ["gunicorn", "--bind", ":8000", "--workers", "3", "acms.wsgi:application"]
+CMD ["gunicorn", "--bind", ":8000", "--workers", "3", "send_email.wsgi:application"]

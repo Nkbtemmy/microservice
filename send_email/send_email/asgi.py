@@ -1,5 +1,5 @@
 """
-ASGI config for sendEmail project.
+ASGI config for send_email project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sendEmail.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "send_email.settings")
 
 application = get_asgi_application()
